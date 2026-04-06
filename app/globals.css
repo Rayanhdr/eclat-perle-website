@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-rose-primary: #C4788A;
+  --color-rose-dark: #8B4E6B;
+  --color-teal: #3D9B8C;
+  --color-gold: #D4A853;
+  --color-pink-bg: #F9EEF3;
+  --color-warm-white: #FBF7F4;
+  --color-dark-text: #1A1A2E;
+}
+
+:root {
+  --background: #FBF7F4;
+  --foreground: #1A1A2E;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Lato', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F9EEF3;
+}
+::-webkit-scrollbar-thumb {
+  background: #C4788A;
+  border-radius: 3px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.product-placeholder {
+  background: linear-gradient(135deg, #F9EEF3 0%, rgba(196,120,138,0.2) 25%, #F9EEF3 50%, rgba(61,155,140,0.2) 75%, #F9EEF3 100%);
+  background-size: 400% 400%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #8B4E6B 0%, #C4788A 50%, #3D9B8C 100%);
+}
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(196, 120, 138, 0.2);
+}
