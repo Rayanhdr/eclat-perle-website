@@ -37,13 +37,11 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
-    const products = getProducts();
-    const found = products.find((p) => p.id === params.id);
-    if (!found) {
-      router.push('/shop');
-      return;
-    }
-    setProduct(found);
+    getProducts().then((products) => {
+      const found = products.find((p) => p.id === params.id);
+      if (!found) { router.push('/shop'); return; }
+      setProduct(found);
+    });
   }, [params.id, router]);
 
   if (!product) {

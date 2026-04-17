@@ -23,7 +23,7 @@ export default function AdminLoginPage() {
     // Simulate a brief loading state
     await new Promise((r) => setTimeout(r, 500));
 
-    const adminPassword = getAdminPassword();
+    const adminPassword = await getAdminPassword();
 
     if (email === ADMIN_EMAIL && password === adminPassword) {
       sessionStorage.setItem('isAdmin', 'true');

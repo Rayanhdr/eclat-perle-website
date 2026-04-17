@@ -9,7 +9,7 @@ export default function Footer() {
   const [waNumber, setWaNumber] = useState('96170000000');
 
   useEffect(() => {
-    setWaNumber(getWhatsAppNumber());
+    getWhatsAppNumber().then(setWaNumber);
   }, []);
 
   return (

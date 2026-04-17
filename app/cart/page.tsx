@@ -22,8 +22,8 @@ export default function CartPage() {
     return encodeURIComponent(message);
   };
 
-  const handleWhatsApp = () => {
-    const number = getWhatsAppNumber();
+  const handleWhatsApp = async () => {
+    const number = await getWhatsAppNumber();
     const msg = buildWhatsAppMessage();
     window.open(`https://wa.me/${number}?text=${msg}`, '_blank');
   };

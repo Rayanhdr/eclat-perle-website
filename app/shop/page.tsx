@@ -18,7 +18,7 @@ function ShopContent() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    setProducts(getProducts());
+    getProducts().then(setProducts);
     const cat = searchParams.get('category');
     if (cat && CATEGORIES.includes(cat)) {
       setActiveCategory(cat);
