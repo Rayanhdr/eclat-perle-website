@@ -126,24 +126,15 @@ From the dashboard you can:
 
 ---
 
-## Deployment
+## Deployment (https://eclat-perle-website.vercel.app)
 
-The recommended way to deploy is [Vercel](https://vercel.com/) — free hosting built for Next.js:
+The recommended way to deploy is [Vercel](https://vercel.com/)
 
 1. Push this repository to GitHub
 2. Go to [vercel.com](https://vercel.com) → **New Project** → import your repo
 3. Click **Deploy** — no additional configuration needed
-4. Vercel assigns a free public URL (e.g. `eclat-perle.vercel.app`)
 
 You can also connect a custom domain from the Vercel dashboard at any time.
-
----
-
-## Notes
-
-- **No database** — All data lives in the browser's `localStorage`. If the browser cache is cleared, default products reload. For persistent multi-device data, a backend (e.g., Supabase, Firebase) would be a future upgrade.
-- **Images** — Product images are compressed to base64 and stored locally. Suitable for small catalogs; for larger scale, cloud image storage (e.g., Cloudinary) is recommended.
-- **WhatsApp number** — Set your real number in **Admin → Settings** (format: country code + number, no `+` sign or spaces — e.g. `96170123456`).
 
 ---
 
