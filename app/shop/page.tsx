@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 import { Search } from 'lucide-react';
 import { Suspense } from 'react';
 
-const CATEGORIES = ['All', 'Resin Art', 'Keychains', 'Jewelry', 'Kids', 'Gifts', 'Summer'];
+const CATEGORIES = ['All', 'Resin Art', 'Keychains', 'Jewelry', 'Necklace', 'Bracelet', 'Earrings', 'Rings', 'Kids', 'Gifts'];
 
 function ShopContent() {
   const searchParams = useSearchParams();

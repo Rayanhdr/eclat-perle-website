@@ -4,7 +4,7 @@ import { useCart } from '@/context/CartContext';
 import { formatPrice, getWhatsAppNumber } from '@/lib/defaultProducts';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle, CreditCard } from 'lucide-react';
 import Footer from '@/components/Footer';
 
 export default function CartPage() {
@@ -228,17 +228,26 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                <Link
+                  href="/checkout"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-full font-semibold text-white text-base transition-all duration-200 hover:scale-105 hover:shadow-xl"
+                  style={{ backgroundColor: '#C4788A' }}
+                >
+                  <CreditCard size={20} />
+                  Proceed to Checkout
+                </Link>
+
                 <button
                   onClick={handleWhatsApp}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-full font-semibold text-white text-base transition-all duration-200 hover:scale-105 hover:shadow-xl"
-                  style={{ backgroundColor: '#25D366' }}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-base transition-all duration-200 hover:scale-105 border mt-2"
+                  style={{ borderColor: '#25D366', color: '#25D366', backgroundColor: 'transparent' }}
                 >
-                  <MessageCircle size={20} />
-                  Send Order via WhatsApp
+                  <MessageCircle size={18} />
+                  Quick WhatsApp Order
                 </button>
 
-                <p className="text-xs text-gray-400 text-center mt-3">
-                  You&apos;ll be redirected to WhatsApp to confirm your order.
+                <p className="text-xs text-gray-400 text-center mt-2">
+                  Checkout: fill your details &amp; get email confirmation.<br/>WhatsApp: send order directly.
                 </p>
               </div>
             </div>

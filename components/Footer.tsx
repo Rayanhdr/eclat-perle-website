@@ -2,6 +2,14 @@
 
 import Link from 'next/link';
 import { AtSign, MessageCircle, Heart, Lock } from 'lucide-react';
+
+function FacebookIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
 import { useEffect, useState } from 'react';
 import { getWhatsAppNumber } from '@/lib/defaultProducts';
 
@@ -54,14 +62,13 @@ export default function Footer() {
           <div className="flex flex-col gap-3">
             <h4 className="font-semibold text-white tracking-wide uppercase text-sm">Connect With Us</h4>
             <div className="flex flex-col gap-3">
-              <a
-                href="https://instagram.com/eclat_perle"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-gray-300 hover:text-pink-300 transition-colors duration-200"
-              >
-                <AtSign size={16} />
-                @eclat_perle
+              <a href="https://instagram.com/eclat_perle" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-gray-300 hover:text-pink-300 transition-colors duration-200">
+                <AtSign size={16} /> @eclat_perle
+              </a>
+              <a href="https://www.facebook.com/share/1NQRCPu3K8/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-gray-300 hover:text-blue-300 transition-colors duration-200">
+                <FacebookIcon size={16} /> Facebook
               </a>
               <a
                 href={`https://wa.me/${waNumber}`}

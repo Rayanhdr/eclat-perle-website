@@ -148,31 +148,20 @@ export default function ProductDetailPage() {
               {/* Quantity Selector */}
               <div className="flex items-center gap-4">
                 <span className="text-sm font-semibold text-gray-700">Quantity:</span>
-                <div
-                  className="flex items-center gap-0 rounded-full overflow-hidden border"
-                  style={{ borderColor: 'rgba(196,120,138,0.3)' }}
-                >
+                <div className="flex items-center gap-0 rounded-full overflow-hidden border" style={{ borderColor: 'rgba(196,120,138,0.3)' }}>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-2 text-sm font-bold transition-colors duration-200 hover:bg-pink-50" style={{ color: '#C4788A' }}><Minus size={14} /></button>
+                  <span className="px-4 py-2 text-sm font-bold border-x" style={{ borderColor: 'rgba(196,120,138,0.3)', color: '#1A1A2E' }}>{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 text-sm font-bold transition-colors duration-200 hover:bg-pink-50"
-                    style={{ color: '#C4788A' }}
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <span
-                    className="px-4 py-2 text-sm font-bold border-x"
-                    style={{ borderColor: 'rgba(196,120,138,0.3)', color: '#1A1A2E' }}
-                  >
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-2 text-sm font-bold transition-colors duration-200 hover:bg-pink-50"
-                    style={{ color: '#C4788A' }}
-                  >
+                    onClick={() => setQuantity(product.max_quantity ? Math.min(product.max_quantity, quantity + 1) : quantity + 1)}
+                    disabled={!!(product.max_quantity && quantity >= product.max_quantity)}
+                    className="px-4 py-2 text-sm font-bold transition-colors duration-200 hover:bg-pink-50 disabled:opacity-40"
+                    style={{ color: '#C4788A' }}>
                     <Plus size={14} />
                   </button>
                 </div>
+                {product.max_quantity && (
+                  <span className="text-xs text-gray-400">{product.max_quantity} available</span>
+                )}
               </div>
 
               {/* Add to Cart */}

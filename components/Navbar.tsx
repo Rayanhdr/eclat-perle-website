@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useEffect, useState } from 'react';
 import { ShoppingCart, Menu, X } from 'lucide-react';
@@ -38,17 +39,16 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <span
-              className="text-2xl font-bold tracking-wide"
-              style={{
-                fontFamily: 'var(--font-playfair), Playfair Display, serif',
-                color: '#8B4E6B',
-              }}
-            >
-              Eclat Perlé
-            </span>
-            <span className="text-xl">✨</span>
+          <Link href="/" className="flex items-center group">
+            <Image
+              src="/logo.png"
+              alt="Eclat Perlé"
+              width={130}
+              height={48}
+              className="object-contain"
+              style={{ maxHeight: '48px', width: 'auto' }}
+              priority
+            />
           </Link>
 
           {/* Desktop Nav Links */}

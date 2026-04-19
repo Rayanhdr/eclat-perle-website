@@ -1,6 +1,15 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import Footer from '@/components/Footer';
-import { Sparkles, Truck, Star, ArrowRight, AtSign } from 'lucide-react';
+import { Sparkles, ArrowRight, AtSign } from 'lucide-react';
+
+function FacebookIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
 
 const COLLECTIONS = [
   {
@@ -66,15 +75,10 @@ export default function HomePage() {
         className="relative min-h-screen flex items-center justify-center"
         style={{ background: 'linear-gradient(135deg, #1A1A2E 0%, #8B4E6B 40%, #C4788A 70%, #3D9B8C 100%)' }}
       >
-
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-16">
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-medium"
-            style={{
-              backgroundColor: 'rgba(212, 168, 83, 0.2)',
-              color: '#D4A853',
-              border: '1px solid rgba(212, 168, 83, 0.4)',
-            }}
+            style={{ backgroundColor: 'rgba(212,168,83,0.2)', color: '#D4A853', border: '1px solid rgba(212,168,83,0.4)' }}
           >
             <Sparkles size={14} />
             Handcrafted in Lebanon
@@ -90,27 +94,18 @@ export default function HomePage() {
           </h1>
 
           <p className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Discover unique resin art, keychains, pearl jewelry, and gift sets — each piece lovingly
-            crafted by hand at Eclat Perlé.
+            Discover unique resin art, keychains, pearl jewelry, and gift sets — each piece lovingly crafted by hand at Eclat Perlé.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/shop"
+            <Link href="/shop"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-              style={{ backgroundColor: '#C4788A' }}
-            >
+              style={{ backgroundColor: '#C4788A' }}>
               Shop Now <ArrowRight size={18} />
             </Link>
-            <Link
-              href="/#our-story"
+            <Link href="/#our-story"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105"
-              style={{
-                border: '2px solid rgba(255,255,255,0.5)',
-                color: 'white',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              }}
-            >
+              style={{ border: '2px solid rgba(255,255,255,0.5)', color: 'white', backgroundColor: 'rgba(255,255,255,0.1)' }}>
               Our Story
             </Link>
           </div>
@@ -134,42 +129,27 @@ export default function HomePage() {
       <section className="py-20 px-4" style={{ backgroundColor: '#FBF7F4' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: '#3D9B8C' }}>
-              Explore
-            </span>
-            <h2
-              className="text-4xl sm:text-5xl font-bold mt-2 mb-4"
-              style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}
-            >
+            <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: '#3D9B8C' }}>Explore</span>
+            <h2 className="text-4xl sm:text-5xl font-bold mt-2 mb-4"
+              style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}>
               Our Collections
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               From resin art to handcrafted jewelry — find something beautiful for yourself or someone special.
             </p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {COLLECTIONS.map((col) => (
-              <Link
-                key={col.title}
-                href={col.href}
+              <Link key={col.title} href={col.href}
                 className="card-hover rounded-2xl p-6 text-center group block"
-                style={{ background: col.gradient, border: '1px solid rgba(196,120,138,0.15)' }}
-              >
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300 inline-block">
-                  {col.emoji}
-                </div>
-                <h3
-                  className="text-xl font-bold mb-2"
-                  style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: col.accent }}
-                >
+                style={{ background: col.gradient, border: '1px solid rgba(196,120,138,0.15)' }}>
+                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300 inline-block">{col.emoji}</div>
+                <h3 className="text-xl font-bold mb-2"
+                  style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: col.accent }}>
                   {col.title}
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{col.description}</p>
-                <div
-                  className="mt-4 inline-flex items-center gap-1 text-sm font-semibold"
-                  style={{ color: col.accent }}
-                >
+                <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold" style={{ color: col.accent }}>
                   Explore <ArrowRight size={14} />
                 </div>
               </Link>
@@ -182,30 +162,21 @@ export default function HomePage() {
       <section className="py-20 px-4" style={{ backgroundColor: '#F9EEF3' }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: '#C4788A' }}>
-              Why Us
-            </span>
-            <h2
-              className="text-4xl sm:text-5xl font-bold mt-2 mb-4"
-              style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}
-            >
+            <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: '#C4788A' }}>Why Us</span>
+            <h2 className="text-4xl sm:text-5xl font-bold mt-2 mb-4"
+              style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}>
               Why Choose Eclat Perlé?
             </h2>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {WHY_CHOOSE.map((item) => (
               <div key={item.title} className="card-hover bg-white rounded-2xl p-8 text-center shadow-sm">
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 text-3xl"
-                  style={{ backgroundColor: item.color + '22' }}
-                >
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 text-3xl"
+                  style={{ backgroundColor: item.color + '22' }}>
                   {item.icon}
                 </div>
-                <h3
-                  className="text-xl font-bold mb-3"
-                  style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}
-                >
+                <h3 className="text-xl font-bold mb-3"
+                  style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}>
                   {item.title}
                 </h3>
                 <p className="text-gray-500 leading-relaxed">{item.description}</p>
@@ -219,72 +190,63 @@ export default function HomePage() {
       <section id="our-story" className="py-20 px-4" style={{ backgroundColor: '#FBF7F4' }}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* Portrait Image */}
             <div className="relative">
-              <div
-                className="w-full h-80 rounded-3xl flex items-center justify-center"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(139,78,107,0.1) 0%, rgba(196,120,138,0.2) 50%, rgba(61,155,140,0.1) 100%)',
-                  border: '2px solid rgba(196, 120, 138, 0.2)',
-                }}
-              >
-                <div className="text-center">
-                  <div className="text-6xl mb-3">👩‍⚕️🎨</div>
-                  <p
-                    className="text-lg font-semibold"
-                    style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#8B4E6B' }}
-                  >
-                    Nurse &amp; Artist
-                  </p>
-                </div>
+              <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl" style={{ aspectRatio: '3/4', maxHeight: '560px' }}>
+                <Image
+                  src="/story-portrait.jpg"
+                  alt="Eclat Perlé founder — Nurse & Artist"
+                  fill
+                  className="object-cover"
+                />
               </div>
               <div
                 className="absolute -bottom-4 -right-4 bg-white rounded-2xl px-5 py-3 shadow-lg"
-                style={{ border: '2px solid rgba(212, 168, 83, 0.3)' }}
+                style={{ border: '2px solid rgba(212,168,83,0.3)' }}
               >
                 <p className="text-xs text-gray-500">Founded with</p>
-                <p className="font-bold text-sm" style={{ color: '#D4A853' }}>
-                  ❤️ Passion &amp; Love
-                </p>
+                <p className="font-bold text-sm" style={{ color: '#D4A853' }}>❤️ Passion &amp; Love</p>
               </div>
             </div>
 
+            {/* Story Text */}
             <div>
-              <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: '#3D9B8C' }}>
-                Our Story
-              </span>
-              <h2
-                className="text-4xl sm:text-5xl font-bold mt-2 mb-6 leading-snug"
-                style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}
-              >
+              <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: '#3D9B8C' }}>Our Story</span>
+              <h2 className="text-4xl sm:text-5xl font-bold mt-2 mb-6 leading-snug"
+                style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}>
                 Born from a Nurse&apos;s Creative Heart
               </h2>
-              <p className="text-gray-600 leading-relaxed mb-4">
-                Eclat Perlé was created by a nurse with an unwavering passion for art and handcraft. Balancing long
-                shifts and a love for creativity, each piece is crafted during precious moments of calm — with full
-                attention, care, and love.
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                From delicate pearl necklaces to vibrant resin keychains, every item carries a piece of that
-                dedication. We believe accessories should tell your story — and ours is one of resilience,
-                beauty, and love made tangible.
-              </p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <a
-                  href="https://instagram.com/eclat_perle"
-                  target="_blank"
-                  rel="noopener noreferrer"
+
+              <div className="flex flex-col gap-4 text-gray-600 leading-relaxed text-sm sm:text-base">
+                <p>
+                  At Éclat Perlé, I am a registered nurse with a lifelong passion for creating accessories and handmade crafts. Since childhood, art has been my way of reconnecting with nature and expressing beauty through meaningful pieces.
+                </p>
+                <p>
+                  Through my work, I aim to remind people of the soul of Lebanon by highlighting its natural beauty and meaningful symbols such as the cedar and other Lebanese icons. Éclat Perlé is more than a brand — it represents my journey toward stability, independence, and purpose.
+                </p>
+                <p>
+                  We create resin jewelry, handcrafted accessories and unique artisanal pieces inspired by nature, authenticity, and the Lebanese spirit. What makes Eclat Perlé special is that each piece is carefully handmade with love – no two pieces are exactly alike.
+                </p>
+                <p>
+                  As a nurse, I deeply believe that every person is unique, and just as quality, precision, and responsibility are essential in healthcare, they are also a priority in my creative work. I translate this belief into my creations by offering personalized pieces crafted with care, high standards, and attention to detail — so that each client receives something truly special and meaningful.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 flex-wrap mt-6">
+                <a href="https://instagram.com/eclat_perle" target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white transition-all duration-200 hover:scale-105"
-                  style={{ backgroundColor: '#C4788A' }}
-                >
-                  <AtSign size={16} />
-                  Follow Us
+                  style={{ backgroundColor: '#C4788A' }}>
+                  <AtSign size={16} /> Instagram
                 </a>
-                <Link
-                  href="/shop"
+                <a href="https://www.facebook.com/share/1NQRCPu3K8/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white transition-all duration-200 hover:scale-105"
+                  style={{ backgroundColor: '#1877F2' }}>
+                  <FacebookIcon size={16} /> Facebook
+                </a>
+                <Link href="/shop"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-semibold transition-all duration-200 hover:scale-105"
-                  style={{ color: '#8B4E6B', border: '2px solid #C4788A' }}
-                >
+                  style={{ color: '#8B4E6B', border: '2px solid #C4788A' }}>
                   Shop Now <ArrowRight size={16} />
                 </Link>
               </div>
@@ -293,32 +255,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Instagram CTA */}
-      <section
-        className="py-16 px-4 text-center text-white"
-        style={{ background: 'linear-gradient(135deg, #8B4E6B 0%, #C4788A 60%, #3D9B8C 100%)' }}
-      >
+      {/* Social CTA */}
+      <section className="py-16 px-4 text-center text-white"
+        style={{ background: 'linear-gradient(135deg, #8B4E6B 0%, #C4788A 60%, #3D9B8C 100%)' }}>
         <div className="max-w-2xl mx-auto">
           <div className="text-4xl mb-4">✨</div>
-          <h2
-            className="text-3xl font-bold mb-3"
-            style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif' }}
-          >
+          <h2 className="text-3xl font-bold mb-3"
+            style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif' }}>
             Follow Our Journey
           </h2>
           <p className="text-white/80 mb-6">
-            See behind-the-scenes, new arrivals, and customer favourites on Instagram.
+            See behind-the-scenes, new arrivals, and customer favourites on social media.
           </p>
-          <a
-            href="https://instagram.com/eclat_perle"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold bg-white transition-all duration-200 hover:scale-105 hover:shadow-xl"
-            style={{ color: '#8B4E6B' }}
-          >
-            <AtSign size={18} />
-            @eclat_perle
-          </a>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <a href="https://instagram.com/eclat_perle" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold bg-white transition-all duration-200 hover:scale-105 hover:shadow-xl"
+              style={{ color: '#8B4E6B' }}>
+              <AtSign size={18} /> @eclat_perle
+            </a>
+            <a href="https://www.facebook.com/share/1NQRCPu3K8/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold transition-all duration-200 hover:scale-105 hover:shadow-xl"
+              style={{ backgroundColor: '#1877F2', color: 'white' }}>
+              <FacebookIcon size={18} /> Facebook
+            </a>
+          </div>
         </div>
       </section>
 

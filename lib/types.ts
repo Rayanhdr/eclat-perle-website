@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   description: string;
   image: string;
+  max_quantity?: number;
 }
 
 export interface CartItem {
@@ -12,11 +13,23 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface OrderCustomer {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  city: string;
+  notes: string;
+}
+
 export type Category =
   | 'All'
   | 'Resin Art'
   | 'Keychains'
   | 'Jewelry'
+  | 'Necklace'
+  | 'Bracelet'
+  | 'Earrings'
+  | 'Rings'
   | 'Kids'
-  | 'Gifts'
-  | 'Summer';
+  | 'Gifts';
