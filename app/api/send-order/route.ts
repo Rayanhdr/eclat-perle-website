@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { getAdminEmail } from '@/lib/defaultProducts';
 
 export async function POST(request: NextRequest) {
   try {
     const { customer, items, subtotal, deliveryCharge, total, orderId } = await request.json();
 
     const apiKey = process.env.RESEND_API_KEY;
-    const adminEmail = process.env.ADMIN_EMAIL;
-
-    if (!apiKey || !adminEmail) {
+    if (!apiKey) {
       return NextResponse.json({ success: false, message: 'Email not configured' });
+    }
+
+    // Read admin email from Supabase settings, fallback to env var
+    const adminEmail = (await getAdminEmail()) || process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+      return NextResponse.json({ success: false, message: 'No admin email set' });
     }
 
     const resend = new Resend(apiKey);

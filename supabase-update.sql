@@ -7,8 +7,9 @@
 -- 1. Add max_quantity column to products
 ALTER TABLE products ADD COLUMN IF NOT EXISTS max_quantity INTEGER DEFAULT NULL;
 
--- 2. Add delivery_charge to settings
+-- 2. Add delivery_charge and admin_email to settings
 INSERT INTO settings (key, value) VALUES ('delivery_charge', '0') ON CONFLICT (key) DO NOTHING;
+INSERT INTO settings (key, value) VALUES ('admin_email', '') ON CONFLICT (key) DO NOTHING;
 
 -- 3. Create orders table
 CREATE TABLE IF NOT EXISTS orders (

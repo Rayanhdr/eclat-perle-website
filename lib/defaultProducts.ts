@@ -72,6 +72,12 @@ export async function getAdminPassword(): Promise<string> {
 export async function saveAdminPassword(password: string): Promise<boolean> {
   return saveSetting('admin_password', password);
 }
+export async function getAdminEmail(): Promise<string> {
+  return getSetting('admin_email', '');
+}
+export async function saveAdminEmail(email: string): Promise<boolean> {
+  return saveSetting('admin_email', email);
+}
 export async function getDeliveryCharge(): Promise<number> {
   const val = await getSetting('delivery_charge', '0');
   return parseFloat(val) || 0;

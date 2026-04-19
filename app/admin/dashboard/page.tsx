@@ -6,12 +6,13 @@ import {
   getProducts, addProduct, updateProduct, deleteProduct, formatPrice,
   getWhatsAppNumber, saveWhatsAppNumber, getAdminPassword, saveAdminPassword,
   getDeliveryCharge, saveDeliveryCharge, getOrders, updateOrderStatus,
+  getAdminEmail, saveAdminEmail,
 } from '@/lib/defaultProducts';
 import { Product } from '@/lib/types';
 import {
   Plus, Pencil, Trash2, X, Save, LogOut, Package, Settings,
   Phone, Lock, LayoutDashboard, Upload, ImageIcon, Trash, Loader2,
-  ShoppingBag, ChevronDown, ChevronUp, Truck,
+  ShoppingBag, ChevronDown, ChevronUp, Truck, Mail,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -98,6 +99,7 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   // Settings
   const [whatsapp, setWhatsapp] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
   const [deliveryCharge, setDeliveryCharge] = useState('0');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -115,6 +117,7 @@ export default function AdminDashboard() {
     setLoadingProducts(true);
     getProducts().then((d) => { setProducts(d); setLoadingProducts(false); });
     getWhatsAppNumber().then(setWhatsapp);
+    getAdminEmail().then(setAdminEmail);
     getDeliveryCharge().then((v) => setDeliveryCharge(v.toString()));
   }, [router]);
 
@@ -159,6 +162,7 @@ export default function AdminDashboard() {
     setSavingSettings(true);
     try {
       await saveWhatsAppNumber(whatsapp);
+      await saveAdminEmail(adminEmail);
       await saveDeliveryCharge(parseFloat(deliveryCharge) || 0);
       if (newPassword) { await saveAdminPassword(newPassword); setNewPassword(''); setConfirmPassword(''); }
       setSettingsSaved(true);
@@ -336,6 +340,14 @@ export default function AdminDashboard() {
               <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="96170000000"
                 className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none" style={{ borderColor: 'rgba(196,120,138,0.3)', color: '#1A1A2E' }} />
               <p className="text-xs text-gray-400 mt-1.5">Example: 96170000000 (Lebanon: 961 + number)</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: 'rgba(196,120,138,0.15)' }}>
+              <h3 className="font-semibold text-base mb-4 flex items-center gap-2" style={{ color: '#1A1A2E' }}><Mail size={16} style={{ color: '#C4788A' }} /> Order Notification Email</h3>
+              <label className="block text-sm font-medium mb-1.5 text-gray-600">Email address to receive new orders</label>
+              <input type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} placeholder="your@email.com"
+                className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none" style={{ borderColor: 'rgba(196,120,138,0.3)', color: '#1A1A2E' }} />
+              <p className="text-xs text-gray-400 mt-1.5">You will receive a copy of every order placed on the website. Requires Resend API key to be active.</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: 'rgba(196,120,138,0.15)' }}>
