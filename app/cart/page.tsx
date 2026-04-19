@@ -6,9 +6,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle, CreditCard } from 'lucide-react';
 import Footer from '@/components/Footer';
+import { useEffect, useState } from 'react';
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
+  const [waNumber, setWaNumber] = useState('96170000000');
+
+  // Load WhatsApp number on mount so the button works instantly on mobile
+  useEffect(() => {
+    getWhatsAppNumber().then(setWaNumber);
+  }, []);
 
   const buildWhatsAppMessage = () => {
     const itemLines = items
@@ -22,10 +29,10 @@ export default function CartPage() {
     return encodeURIComponent(message);
   };
 
-  const handleWhatsApp = async () => {
-    const number = await getWhatsAppNumber();
+  // Synchronous — opens instantly on mobile without popup block
+  const handleWhatsApp = () => {
     const msg = buildWhatsAppMessage();
-    window.open(`https://wa.me/${number}?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
   };
 
   if (items.length === 0) {
