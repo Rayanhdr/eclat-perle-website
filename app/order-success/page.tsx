@@ -32,8 +32,8 @@ function SuccessContent() {
           <h3 className="font-semibold text-sm mb-3" style={{ color: '#1A1A2E' }}>What happens next?</h3>
           <div className="flex flex-col gap-3">
             {[
-              { icon: '📱', text: 'A WhatsApp message was sent with your order details' },
-              { icon: '✅', text: 'We will confirm your order shortly via WhatsApp' },
+              { icon: '📧', text: 'A confirmation email has been sent to the shop' },
+              { icon: '✅', text: 'We will contact you shortly to confirm your order' },
               { icon: '🚚', text: 'Your items will be carefully prepared and delivered' },
               { icon: '💵', text: 'Pay cash when your order arrives at your door' },
             ].map((step) => (

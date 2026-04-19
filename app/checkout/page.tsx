@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import { getDeliveryCharge, getWhatsAppNumber, saveOrder, formatPrice } from '@/lib/defaultProducts';
+import { getDeliveryCharge, saveOrder, formatPrice } from '@/lib/defaultProducts';
 import { OrderCustomer } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, User, Phone, MapPin, MessageCircle, ShoppingBag, Loader2, Truck, CreditCard } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, ShoppingBag, Loader2, Truck, CreditCard } from 'lucide-react';
 
 const EMPTY_CUSTOMER: OrderCustomer = { firstName: '', lastName: '', phone: '', address: '', city: '', notes: '' };
 
@@ -55,19 +55,9 @@ export default function CheckoutPage() {
         });
       } catch { /* email is optional */ }
 
-      // 3. Build WhatsApp message
-      const waNumber = await getWhatsAppNumber();
-      const itemLines = items.map((i) => `- ${i.product.name} ×${i.quantity} — $${(i.product.price * i.quantity).toFixed(2)}`).join('\n');
-      const msg = encodeURIComponent(
-        `🛍️ New Order — Eclat Perlé\n\n👤 ${customer.firstName} ${customer.lastName}\n📞 ${customer.phone}\n📍 ${customer.address}${customer.city ? `, ${customer.city}` : ''}\n${customer.notes ? `📝 ${customer.notes}\n` : ''}\n📦 Items:\n${itemLines}\n\n💵 Subtotal: $${totalPrice.toFixed(2)}\n🚚 Delivery: $${deliveryCharge.toFixed(2)}\n💰 Total: $${total.toFixed(2)}\n\n💳 Payment: Cash on Delivery\n\nPlease confirm my order 🙏`
-      );
-
-      // 4. Clear cart & redirect to success
+      // 3. Clear cart & redirect to success
       clearCart();
       router.push(`/order-success?id=${orderId ?? 'new'}`);
-
-      // 5. Open WhatsApp
-      window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
     } finally {
       setPlacing(false);
     }
@@ -219,8 +209,8 @@ export default function CheckoutPage() {
               </button>
 
               <div className="mt-3 flex items-center justify-center gap-2 text-xs text-gray-400">
-                <MessageCircle size={12} style={{ color: '#25D366' }} />
-                Order details will also be sent to WhatsApp
+                <ShoppingBag size={12} style={{ color: '#C4788A' }} />
+                Order saved &amp; confirmation sent by email
               </div>
             </div>
           </div>
