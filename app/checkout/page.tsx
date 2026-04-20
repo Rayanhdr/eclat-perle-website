@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import { getDeliveryCharge, saveOrder, formatPrice } from '@/lib/defaultProducts';
+import { getDeliveryCharge, formatPrice } from '@/lib/defaultProducts';
 import { OrderCustomer } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -43,8 +43,24 @@ export default function CheckoutPage() {
     if (!validate()) return;
     setPlacing(true);
     try {
-      // 1. Save order to Supabase
-      const orderId = await saveOrder(customer, items, totalPrice, deliveryCharge);
+      // 1. Save order via secure server API route (uses service role — bypasses RLS)
+      const orderRes = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer,
+          items: items.map(i => ({ name: i.product.name, category: i.product.category, price: i.product.price, quantity: i.quantity })),
+          subtotal: totalPrice,
+          deliveryCharge,
+        }),
+      });
+
+      if (!orderRes.ok) {
+        console.error('Failed to save order');
+        return;
+      }
+
+      const { id: orderId } = await orderRes.json();
 
       // 2. Send email (non-blocking — won't fail the order if email fails)
       try {
