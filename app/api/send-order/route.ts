@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { getAdminEmail } from '@/lib/defaultProducts';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+
+async function getAdminEmailServer(): Promise<string> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data } = await supabase.from('settings').select('value').eq('key', 'admin_email').single();
+    return data?.value ?? '';
+  } catch {
+    return '';
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,8 +21,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Email not configured' });
     }
 
-    // Read admin email from Supabase settings, fallback to env var
-    const adminEmail = (await getAdminEmail()) || process.env.ADMIN_EMAIL;
+    // Read admin email from Supabase settings (uses service role — bypasses RLS), fallback to env var
+    const adminEmail = (await getAdminEmailServer()) || process.env.ADMIN_EMAIL;
     if (!adminEmail) {
       return NextResponse.json({ success: false, message: 'No admin email set' });
     }

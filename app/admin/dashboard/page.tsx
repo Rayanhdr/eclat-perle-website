@@ -4,9 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   getProducts, addProduct, updateProduct, deleteProduct, formatPrice,
-  getWhatsAppNumber, saveWhatsAppNumber, getAdminPassword, saveAdminPassword,
-  getDeliveryCharge, saveDeliveryCharge, getOrders, updateOrderStatus,
-  getAdminEmail, saveAdminEmail,
 } from '@/lib/defaultProducts';
 import { Product } from '@/lib/types';
 import {
@@ -111,24 +108,46 @@ export default function AdminDashboard() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
+  // ── Secure API helper (attaches admin token to every request) ────────────────
+  const adminFetch = useCallback((url: string, options: RequestInit = {}) => {
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('adminToken') ?? '' : '';
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(options.headers ?? {}),
+      },
+    });
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (sessionStorage.getItem('isAdmin') !== 'true') { router.push('/admin/login'); return; }
     setLoadingProducts(true);
     getProducts().then((d) => { setProducts(d); setLoadingProducts(false); });
-    getWhatsAppNumber().then(setWhatsapp);
-    getAdminEmail().then(setAdminEmail);
-    getDeliveryCharge().then((v) => setDeliveryCharge(v.toString()));
-  }, [router]);
+    // Load all settings via secure API route
+    adminFetch('/api/admin/settings')
+      .then((r) => r.json())
+      .then((data: Record<string, string>) => {
+        setWhatsapp(data.whatsapp_number ?? '');
+        setAdminEmail(data.admin_email ?? '');
+        setDeliveryCharge(data.delivery_charge ?? '0');
+      })
+      .catch(() => {/* settings load failed silently */});
+  }, [router, adminFetch]);
 
   useEffect(() => {
     if (activeTab === 'orders') {
       setLoadingOrders(true);
-      getOrders().then((d) => { setOrders(d as Record<string, unknown>[]); setLoadingOrders(false); });
+      adminFetch('/api/admin/orders')
+        .then((r) => r.json())
+        .then((d) => { setOrders(Array.isArray(d) ? d : []); setLoadingOrders(false); })
+        .catch(() => setLoadingOrders(false));
     }
-  }, [activeTab]);
+  }, [activeTab, adminFetch]);
 
-  const handleLogout = () => { sessionStorage.removeItem('isAdmin'); router.push('/admin/login'); };
+  const handleLogout = () => { sessionStorage.removeItem('isAdmin'); sessionStorage.removeItem('adminToken'); router.push('/admin/login'); };
   const openAddModal = () => { setEditingProduct(null); setForm(EMPTY_FORM); setShowModal(true); };
   const openEditModal = (p: Product) => { setEditingProduct(p); setForm({ name: p.name, category: p.category, price: p.price, description: p.description, image: p.image, max_quantity: p.max_quantity }); setShowModal(true); };
 
@@ -161,17 +180,27 @@ export default function AdminDashboard() {
     }
     setSavingSettings(true);
     try {
-      await saveWhatsAppNumber(whatsapp);
-      await saveAdminEmail(adminEmail);
-      await saveDeliveryCharge(parseFloat(deliveryCharge) || 0);
-      if (newPassword) { await saveAdminPassword(newPassword); setNewPassword(''); setConfirmPassword(''); }
+      const updates: Record<string, string> = {
+        whatsapp_number: whatsapp,
+        admin_email: adminEmail,
+        delivery_charge: (parseFloat(deliveryCharge) || 0).toString(),
+      };
+      if (newPassword) updates.admin_password = newPassword;
+      await adminFetch('/api/admin/settings', {
+        method: 'POST',
+        body: JSON.stringify(updates),
+      });
+      if (newPassword) { setNewPassword(''); setConfirmPassword(''); }
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 2000);
     } finally { setSavingSettings(false); }
   };
 
   const handleOrderStatus = async (id: string, status: string) => {
-    await updateOrderStatus(id, status);
+    await adminFetch('/api/admin/orders', {
+      method: 'PATCH',
+      body: JSON.stringify({ id, status }),
+    });
     setOrders((prev) => prev.map((o) => (o.id as string) === id ? { ...o, status } : o));
   };
 

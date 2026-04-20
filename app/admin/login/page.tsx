@@ -3,9 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { getAdminPassword } from '@/lib/defaultProducts';
-
-const ADMIN_EMAIL = 'admin@eclatperle.com';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -20,16 +17,26 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
 
-    // Simulate a brief loading state
-    await new Promise((r) => setTimeout(r, 500));
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const adminPassword = await getAdminPassword();
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? 'Invalid email or password. Please try again.');
+        setLoading(false);
+        return;
+      }
 
-    if (email === ADMIN_EMAIL && password === adminPassword) {
+      const { token } = await res.json();
       sessionStorage.setItem('isAdmin', 'true');
+      sessionStorage.setItem('adminToken', token);
       router.push('/admin/dashboard');
-    } else {
-      setError('Invalid email or password. Please try again.');
+    } catch {
+      setError('Network error. Please try again.');
       setLoading(false);
     }
   };
