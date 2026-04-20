@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  getProducts, addProduct, updateProduct, deleteProduct, formatPrice,
-} from '@/lib/defaultProducts';
+import { getProducts, formatPrice } from '@/lib/defaultProducts';
 import { Product } from '@/lib/types';
 import {
   Plus, Pencil, Trash2, X, Save, LogOut, Package, Settings,
@@ -156,11 +154,20 @@ export default function AdminDashboard() {
     setSaving(true);
     try {
       if (editingProduct) {
-        const ok = await updateProduct(editingProduct.id, form);
-        if (ok) setProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...editingProduct, ...form } : p));
+        const res = await adminFetch('/api/admin/products', {
+          method: 'PUT',
+          body: JSON.stringify({ id: editingProduct.id, ...form }),
+        });
+        if (res.ok) setProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...editingProduct, ...form } : p));
       } else {
-        const created = await addProduct(form);
-        if (created) setProducts((prev) => [...prev, created]);
+        const res = await adminFetch('/api/admin/products', {
+          method: 'POST',
+          body: JSON.stringify(form),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          setProducts((prev) => [...prev, created]);
+        }
       }
       setShowModal(false);
     } finally { setSaving(false); }
@@ -168,8 +175,11 @@ export default function AdminDashboard() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this product?')) return;
-    const ok = await deleteProduct(id);
-    if (ok) setProducts((prev) => prev.filter((p) => p.id !== id));
+    const res = await adminFetch('/api/admin/products', {
+      method: 'DELETE',
+      body: JSON.stringify({ id }),
+    });
+    if (res.ok) setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleSaveSettings = async () => {
