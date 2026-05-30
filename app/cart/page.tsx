@@ -25,7 +25,7 @@ export default function CartPage() {
       )
       .join('\n');
 
-    const message = `🛍️ New Order from Eclat Perlé Website!\n\n📦 Items:\n${itemLines}\n\n💰 Total: $${totalPrice.toFixed(2)}\n\nPlease confirm my order 🙏`;
+    const message = `* New Order from Eclat Perlé Website!\n\n* Items:\n${itemLines}\n\n* Total: $${totalPrice.toFixed(2)}\n\nPlease confirm my order.`;
     return encodeURIComponent(message);
   };
 
