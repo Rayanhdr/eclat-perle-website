@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/lib/types';
-import { getProducts, formatPrice } from '@/lib/defaultProducts';
+import { getProductById, formatPrice } from '@/lib/defaultProducts';
 import { useCart } from '@/context/CartContext';
 import { ArrowLeft, ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 import Footer from '@/components/Footer';
@@ -37,8 +37,7 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
-    getProducts(1, 1000).then(({ products }) => {
-      const found = products.find((p) => p.id === params.id);
+    getProductById(params.id as string).then((found) => {
       if (!found) { router.push('/shop'); return; }
       setProduct(found);
     });

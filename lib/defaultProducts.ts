@@ -19,19 +19,43 @@ export function formatPrice(price: number): string {
 
 // ── Products ──────────────────────────────────────────────────────────────────
 
-export async function getProducts(page: number = 1, pageSize: number = 12): Promise<{ products: Product[]; total: number }> {
+export async function getProducts(
+  page: number = 1,
+  pageSize: number = 12,
+  category: string = 'All',
+  search: string = ''
+): Promise<{ products: Product[]; total: number }> {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, error, count } = await getSupabase()
+  let query = getSupabase()
     .from('products')
     .select('*', { count: 'exact' })
-    .order('created_at', { ascending: true })
-    .range(from, to);
+    .order('created_at', { ascending: true });
+
+  if (category && category !== 'All') {
+    query = query.eq('category', category);
+  }
+
+  if (search && search.trim() !== '') {
+    query = query.or(`name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`);
+  }
+
+  const { data, error, count } = await query.range(from, to);
 
   if (error) { console.error('getProducts:', error.message); return { products: DEFAULT_PRODUCTS, total: DEFAULT_PRODUCTS.length }; }
   if (!data || data.length === 0) return { products: [], total: count ?? 0 };
   return { products: data as Product[], total: count ?? 0 };
+}
+
+export async function getProductById(id: string): Promise<Product | null> {
+  const { data, error } = await getSupabase()
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error || !data) return null;
+  return data as Product;
 }
 
 export async function addProduct(product: Omit<Product, 'id'>): Promise<Product | null> {

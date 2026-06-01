@@ -7,7 +7,7 @@ import { getProducts } from '@/lib/defaultProducts';
 import ProductCard from '@/components/ProductCard';
 import Footer from '@/components/Footer';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Suspense } from 'react';
+import { Suspense, useRef } from 'react';
 
 const CATEGORIES = ['All', 'Resin Art', 'Keychains', 'Jewelry', 'Necklace', 'Bracelet', 'Earrings', 'Rings', 'Kids', 'Gifts'];
 const PAGE_SIZE = 12;
@@ -20,12 +20,13 @@ function ShopContent() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  const fetchProducts = useCallback(async (currentPage: number) => {
+  const fetchProducts = useCallback(async (currentPage: number, cat: string, q: string) => {
     setLoading(true);
-    const { products, total } = await getProducts(currentPage, PAGE_SIZE);
+    const { products, total } = await getProducts(currentPage, PAGE_SIZE, cat, q);
     setProducts(products);
     setTotal(total);
     setLoading(false);
@@ -34,30 +35,33 @@ function ShopContent() {
 
   useEffect(() => {
     const cat = searchParams.get('category');
-    if (cat && CATEGORIES.includes(cat)) setActiveCategory(cat);
-  }, [searchParams]);
-
-  useEffect(() => {
-    setPage(1);
-    fetchProducts(1);
-  }, [activeCategory, fetchProducts]);
-
-  useEffect(() => {
-    fetchProducts(page);
-  }, [page, fetchProducts]);
-
-  const filtered = products.filter((p) => {
-    const matchCat = activeCategory === 'All' || p.category === activeCategory;
-    const matchSearch =
-      search.trim() === '' ||
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+    if (cat && CATEGORIES.includes(cat)) {
+      setActiveCategory(cat);
+      fetchProducts(1, cat, '');
+    } else {
+      fetchProducts(1, 'All', '');
+    }
+  }, [searchParams, fetchProducts]);
 
   const handleCategoryChange = (cat: string) => {
     setActiveCategory(cat);
+    setSearch('');
     setPage(1);
+    fetchProducts(1, cat, '');
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => {
+      fetchProducts(1, activeCategory, value);
+    }, 400);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    fetchProducts(newPage, activeCategory, search);
   };
 
   return (
@@ -88,7 +92,7 @@ function ShopContent() {
               type="text"
               placeholder="Search products..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-11 pr-4 py-3 rounded-full border bg-white text-sm focus:outline-none focus:ring-2 transition-all"
               style={{ borderColor: 'rgba(196,120,138,0.3)', color: '#1A1A2E' }}
             />
@@ -126,7 +130,7 @@ function ShopContent() {
             <div className="flex justify-center items-center py-20">
               <div className="text-2xl animate-pulse" style={{ color: '#C4788A' }}>Loading...</div>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : products.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-5xl mb-4">🔍</div>
               <h3
@@ -140,13 +144,14 @@ function ShopContent() {
           ) : (
             <>
               <p className="text-sm text-gray-500 mb-6">
-                Showing <span className="font-semibold" style={{ color: '#C4788A' }}>{filtered.length}</span> of{' '}
+                Showing <span className="font-semibold" style={{ color: '#C4788A' }}>{products.length}</span> of{' '}
                 <span className="font-semibold" style={{ color: '#C4788A' }}>{total}</span> products
                 {activeCategory !== 'All' && <> in <span className="font-semibold">{activeCategory}</span></>}
+                {search && <> matching &quot;<span className="font-semibold">{search}</span>&quot;</>}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filtered.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -155,7 +160,7 @@ function ShopContent() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-3 mt-12">
                   <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
                     className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
@@ -177,7 +182,7 @@ function ShopContent() {
                         ) : (
                           <button
                             key={p}
-                            onClick={() => setPage(p as number)}
+                            onClick={() => handlePageChange(p as number)}
                             className="w-9 h-9 rounded-full text-sm font-semibold transition-all duration-200"
                             style={
                               page === p
@@ -192,7 +197,7 @@ function ShopContent() {
                   </div>
 
                   <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() => handlePageChange(page + 1)}
                     disabled={page === totalPages}
                     className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
