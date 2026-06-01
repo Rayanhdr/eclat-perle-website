@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { getProducts, formatPrice } from '@/lib/defaultProducts';
+import { getProducts, getProductImages, formatPrice } from '@/lib/defaultProducts';
 import { Product } from '@/lib/types';
 import {
   Plus, Pencil, Trash2, X, Save, LogOut, Package, Settings,
@@ -153,6 +153,12 @@ export default function AdminDashboard() {
       setProducts(products);
       setTotalProducts(total);
       setLoadingProducts(false);
+      // Load images in background
+      if (products.length > 0) {
+        getProductImages(products.map((p) => p.id)).then((imageMap) => {
+          setProducts((prev) => prev.map((p) => ({ ...p, image: imageMap[p.id] ?? '' })));
+        });
+      }
     });
   }, []);
 
