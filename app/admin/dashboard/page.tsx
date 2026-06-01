@@ -7,9 +7,11 @@ import { Product } from '@/lib/types';
 import {
   Plus, Pencil, Trash2, X, Save, LogOut, Package, Settings,
   Phone, Lock, LayoutDashboard, Upload, ImageIcon, Trash, Loader2,
-  ShoppingBag, ChevronDown, ChevronUp, Truck, Mail,
+  ShoppingBag, ChevronDown, ChevronUp, Truck, Mail, ZoomIn, ZoomOut,
 } from 'lucide-react';
 import Image from 'next/image';
+import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 
 const CATEGORIES = ['Resin Art', 'Keychains', 'Jewelry', 'Necklace', 'Bracelet', 'Earrings', 'Rings', 'Anklets', 'Kids', 'Gifts', 'Bookmarks', 'Others'];
 
@@ -41,21 +43,63 @@ function compressImage(file: File): Promise<string> {
   });
 }
 
+// ── Crop helper ───────────────────────────────────────────────────────────────
+function getCroppedBlob(image: HTMLImageElement, crop: PixelCrop): Promise<Blob> {
+  const canvas = document.createElement('canvas');
+  const scaleX = image.naturalWidth / image.width;
+  const scaleY = image.naturalHeight / image.height;
+  const size = 800;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas not supported');
+  ctx.drawImage(
+    image,
+    crop.x * scaleX, crop.y * scaleY,
+    crop.width * scaleX, crop.height * scaleY,
+    0, 0, size, size
+  );
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => { blob ? resolve(blob) : reject(new Error('Blob failed')); }, 'image/jpeg', 0.88);
+  });
+}
+
 // ── Image Upload Zone ─────────────────────────────────────────────────────────
 function ImageUploadZone({ value, onChange, adminToken }: { value: string; onChange: (v: string) => void; adminToken: string }) {
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rawSrc, setRawSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
+  const [scale, setScale] = useState(1);
+  const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const processFile = useCallback(async (file: File) => {
+
+  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    const side = Math.min(width, height);
+    const c = centerCrop(makeAspectCrop({ unit: 'px', width: side }, 1, width, height), width, height);
+    setCrop(c);
+  }, []);
+
+  const openFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => { setRawSrc(reader.result as string); setScale(1); };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const onDrop = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) openFile(f); }, [openFile]);
+  const onFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) openFile(f); e.target.value = ''; }, [openFile]);
+
+  const handleConfirmCrop = useCallback(async () => {
+    if (!imgRef.current || !completedCrop) return;
     setLoading(true);
+    setRawSrc(null);
     try {
-      // Compress first, then upload to Storage
-      const base64 = await compressImage(file);
-      const res = await fetch(base64);
-      const blob = await res.blob();
+      const blob = await getCroppedBlob(imgRef.current, completedCrop);
       const formData = new FormData();
-      formData.append('file', new File([blob], 'image.jpg', { type: blob.type }));
+      formData.append('file', new File([blob], 'image.jpg', { type: 'image/jpeg' }));
       const uploadRes = await fetch('/api/admin/upload', {
         method: 'POST',
         headers: { Authorization: `Bearer ${adminToken}` },
@@ -65,16 +109,72 @@ function ImageUploadZone({ value, onChange, adminToken }: { value: string; onCha
       const { url } = await uploadRes.json();
       onChange(url);
     } catch {
-      // fallback to base64 if upload fails
-      const c = await compressImage(file);
-      onChange(c);
+      alert('Upload failed. Please try again.');
     } finally { setLoading(false); }
-  }, [onChange, adminToken]);
-  const onDrop = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) processFile(f); }, [processFile]);
-  const onFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) processFile(f); e.target.value = ''; }, [processFile]);
+  }, [completedCrop, adminToken, onChange]);
+
   return (
     <div>
       <label className="block text-sm font-medium mb-1.5 text-gray-700">Product Image</label>
+
+      {/* Crop Modal */}
+      {rawSrc && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'rgba(196,120,138,0.15)' }}>
+              <div>
+                <h3 className="font-bold text-base" style={{ color: '#1A1A2E' }}>Crop Your Image</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Drag the box to center your product. Zoom to adjust.</p>
+              </div>
+              <button onClick={() => setRawSrc(null)} className="p-2 rounded-full hover:bg-gray-100"><X size={18} /></button>
+            </div>
+            <div className="p-4 flex flex-col items-center gap-4">
+              <div className="w-full max-h-[380px] overflow-auto flex items-center justify-center bg-gray-50 rounded-2xl">
+                <ReactCrop
+                  crop={crop}
+                  onChange={(c) => setCrop(c)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={1}
+                  minWidth={50}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    ref={imgRef}
+                    src={rawSrc}
+                    alt="Crop preview"
+                    style={{ transform: `scale(${scale})`, transformOrigin: 'center', maxWidth: '100%', display: 'block' }}
+                    onLoad={onImageLoad}
+                  />
+                </ReactCrop>
+              </div>
+
+              {/* Zoom controls */}
+              <div className="flex items-center gap-3 w-full px-2">
+                <ZoomOut size={16} className="text-gray-400 flex-shrink-0" />
+                <input
+                  type="range" min={1} max={3} step={0.05}
+                  value={scale}
+                  onChange={(e) => setScale(Number(e.target.value))}
+                  className="flex-1 accent-pink-400"
+                />
+                <ZoomIn size={16} className="text-gray-400 flex-shrink-0" />
+              </div>
+
+              <div className="flex gap-3 w-full">
+                <button onClick={() => setRawSrc(null)} className="flex-1 py-3 rounded-xl border text-sm font-semibold hover:bg-gray-50 transition" style={{ borderColor: 'rgba(196,120,138,0.3)', color: '#8B4E6B' }}>
+                  Cancel
+                </button>
+                <button onClick={handleConfirmCrop} disabled={!completedCrop}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition hover:scale-105 disabled:opacity-50"
+                  style={{ backgroundColor: '#C4788A' }}>
+                  <Upload size={15} /> Use This Image
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {value ? (
         <div className="relative group rounded-2xl overflow-hidden border-2" style={{ borderColor: 'rgba(196,120,138,0.3)' }}>
           <div className="relative w-full h-52"><Image src={value} alt="Product preview" fill className="object-cover" /></div>
@@ -88,11 +188,16 @@ function ImageUploadZone({ value, onChange, adminToken }: { value: string; onCha
           className="relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center gap-3 py-10 px-4 text-center"
           style={{ borderColor: dragging ? '#C4788A' : 'rgba(196,120,138,0.35)', backgroundColor: dragging ? 'rgba(196,120,138,0.07)' : 'rgba(249,238,243,0.4)' }}>
           {loading ? (
-            <div className="flex flex-col items-center gap-2"><div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#C4788A', borderTopColor: 'transparent' }} /><p className="text-sm text-gray-500">Uploading…</p></div>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#C4788A', borderTopColor: 'transparent' }} />
+              <p className="text-sm text-gray-500">Uploading…</p>
+            </div>
           ) : (
-            <><div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(196,120,138,0.12)' }}><ImageIcon size={26} style={{ color: '#C4788A' }} /></div>
+            <>
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(196,120,138,0.12)' }}><ImageIcon size={26} style={{ color: '#C4788A' }} /></div>
               <div><p className="text-sm font-semibold" style={{ color: '#8B4E6B' }}>Drag &amp; drop your photo here</p><p className="text-xs text-gray-400 mt-1">or <span className="underline font-medium" style={{ color: '#C4788A' }}>click to browse</span></p></div>
-              <p className="text-xs text-gray-400">📱 On phone: choose from Gallery or Camera<br />💻 On PC: pick any image file</p></>
+              <p className="text-xs text-gray-400">📱 On phone: choose from Gallery or Camera<br />💻 On PC: pick any image file</p>
+            </>
           )}
         </div>
       )}
