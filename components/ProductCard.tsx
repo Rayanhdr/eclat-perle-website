@@ -45,13 +45,13 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.id}`} className="block card-hover rounded-2xl overflow-hidden shadow-sm hover:shadow-xl bg-white border border-pink-50 group">
       {/* Image */}
-      <div className="relative h-52 overflow-hidden" style={{ backgroundColor: '#FBF7F4' }}>
+      <div className="relative h-52 overflow-hidden">
         {product.image ? (
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-contain transition-transform duration-500 group-hover:scale-105 p-2"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div
