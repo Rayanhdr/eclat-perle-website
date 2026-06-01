@@ -82,11 +82,15 @@ function ImageUploadZone({ value, onChange }: { value: string; onChange: (v: str
   );
 }
 
+const ADMIN_PAGE_SIZE = 20;
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'settings'>('products');
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [productPage, setProductPage] = useState(1);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -119,11 +123,19 @@ export default function AdminDashboard() {
     });
   }, []);
 
+  const fetchProductPage = useCallback((page: number) => {
+    setLoadingProducts(true);
+    getProducts(page, ADMIN_PAGE_SIZE).then(({ products, total }) => {
+      setProducts(products);
+      setTotalProducts(total);
+      setLoadingProducts(false);
+    });
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (sessionStorage.getItem('isAdmin') !== 'true') { router.push('/admin/login'); return; }
-    setLoadingProducts(true);
-    getProducts(1, 1000).then(({ products }) => { setProducts(products); setLoadingProducts(false); });
+    fetchProductPage(1);
     // Load all settings via secure API route
     adminFetch('/api/admin/settings')
       .then((r) => r.json())
@@ -158,16 +170,13 @@ export default function AdminDashboard() {
           method: 'PUT',
           body: JSON.stringify({ id: editingProduct.id, ...form }),
         });
-        if (res.ok) setProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...editingProduct, ...form } : p));
+        if (res.ok) fetchProductPage(productPage);
       } else {
         const res = await adminFetch('/api/admin/products', {
           method: 'POST',
           body: JSON.stringify(form),
         });
-        if (res.ok) {
-          const created = await res.json();
-          setProducts((prev) => [...prev, created]);
-        }
+        if (res.ok) fetchProductPage(productPage);
       }
       setShowModal(false);
     } finally { setSaving(false); }
@@ -179,7 +188,7 @@ export default function AdminDashboard() {
       method: 'DELETE',
       body: JSON.stringify({ id }),
     });
-    if (res.ok) setProducts((prev) => prev.filter((p) => p.id !== id));
+    if (res.ok) fetchProductPage(productPage);
   };
 
   const handleSaveSettings = async () => {
@@ -252,7 +261,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-3xl font-bold" style={{ fontFamily: 'var(--font-playfair), Playfair Display, serif', color: '#1A1A2E' }}>Products</h2>
-                <p className="text-gray-500 text-sm mt-1">Manage your product catalog ({products.length} items)</p>
+                <p className="text-gray-500 text-sm mt-1">Manage your product catalog ({totalProducts} items)</p>
               </div>
               <button onClick={openAddModal} className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold text-sm transition-all hover:scale-105 shadow-md" style={{ backgroundColor: '#C4788A' }}>
                 <Plus size={16} /> Add Product
@@ -300,6 +309,36 @@ export default function AdminDashboard() {
                 <div className="py-16 text-center text-gray-400"><div className="text-4xl mb-3">📦</div><p>No products yet. Add your first product!</p></div>
               )}
             </div>
+
+            {/* Pagination */}
+            {totalProducts > ADMIN_PAGE_SIZE && (
+              <div className="flex items-center justify-between mt-6">
+                <p className="text-sm text-gray-500">
+                  Showing <span className="font-semibold" style={{ color: '#C4788A' }}>{(productPage - 1) * ADMIN_PAGE_SIZE + 1}–{Math.min(productPage * ADMIN_PAGE_SIZE, totalProducts)}</span> of <span className="font-semibold" style={{ color: '#C4788A' }}>{totalProducts}</span> products
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { setProductPage((p) => p - 1); fetchProductPage(productPage - 1); }}
+                    disabled={productPage === 1}
+                    className="px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                  >
+                    ← Previous
+                  </button>
+                  <span className="text-sm font-semibold px-3 py-2 rounded-full text-white" style={{ backgroundColor: '#C4788A' }}>
+                    {productPage} / {Math.ceil(totalProducts / ADMIN_PAGE_SIZE)}
+                  </span>
+                  <button
+                    onClick={() => { setProductPage((p) => p + 1); fetchProductPage(productPage + 1); }}
+                    disabled={productPage >= Math.ceil(totalProducts / ADMIN_PAGE_SIZE)}
+                    className="px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
