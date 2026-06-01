@@ -85,12 +85,12 @@ export default function ProductDetailPage() {
             {/* Product Image */}
             <div className="rounded-3xl overflow-hidden shadow-xl">
               {product.image ? (
-                <div className="relative h-96 lg:h-[500px]">
+                <div className="relative h-96 lg:h-[500px] rounded-3xl" style={{ backgroundColor: '#F9EEF3' }}>
                   <Image
                     src={product.image}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-contain p-4"
                   />
                 </div>
               ) : (
