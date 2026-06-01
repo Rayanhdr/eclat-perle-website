@@ -42,15 +42,34 @@ function compressImage(file: File): Promise<string> {
 }
 
 // ── Image Upload Zone ─────────────────────────────────────────────────────────
-function ImageUploadZone({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function ImageUploadZone({ value, onChange, adminToken }: { value: string; onChange: (v: string) => void; adminToken: string }) {
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const processFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) return;
     setLoading(true);
-    try { const c = await compressImage(file); onChange(c); } finally { setLoading(false); }
-  }, [onChange]);
+    try {
+      // Compress first, then upload to Storage
+      const base64 = await compressImage(file);
+      const res = await fetch(base64);
+      const blob = await res.blob();
+      const formData = new FormData();
+      formData.append('file', new File([blob], 'image.jpg', { type: blob.type }));
+      const uploadRes = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` },
+        body: formData,
+      });
+      if (!uploadRes.ok) throw new Error('Upload failed');
+      const { url } = await uploadRes.json();
+      onChange(url);
+    } catch {
+      // fallback to base64 if upload fails
+      const c = await compressImage(file);
+      onChange(c);
+    } finally { setLoading(false); }
+  }, [onChange, adminToken]);
   const onDrop = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) processFile(f); }, [processFile]);
   const onFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) processFile(f); e.target.value = ''; }, [processFile]);
   return (
@@ -105,6 +124,11 @@ export default function AdminDashboard() {
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  // Migration
+  const [migrationTotal, setMigrationTotal] = useState(0);
+  const [migrationDone, setMigrationDone] = useState(0);
+  const [migrationRunning, setMigrationRunning] = useState(false);
+  const [migrationFinished, setMigrationFinished] = useState(false);
   // Orders
   const [orders, setOrders] = useState<Record<string, unknown>[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -213,6 +237,27 @@ export default function AdminDashboard() {
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 2000);
     } finally { setSavingSettings(false); }
+  };
+
+  const handleMigration = async () => {
+    setMigrationRunning(true);
+    setMigrationDone(0);
+    setMigrationFinished(false);
+    // Get list of products needing migration
+    const res = await adminFetch('/api/admin/migrate');
+    const { products: toMigrate } = await res.json();
+    setMigrationTotal(toMigrate.length);
+    if (toMigrate.length === 0) { setMigrationRunning(false); setMigrationFinished(true); return; }
+    // Migrate one by one
+    for (let i = 0; i < toMigrate.length; i++) {
+      await adminFetch('/api/admin/migrate', {
+        method: 'POST',
+        body: JSON.stringify({ id: toMigrate[i].id }),
+      });
+      setMigrationDone(i + 1);
+    }
+    setMigrationRunning(false);
+    setMigrationFinished(true);
   };
 
   const handleOrderStatus = async (id: string, status: string) => {
@@ -458,6 +503,36 @@ export default function AdminDashboard() {
               {savingSettings ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {savingSettings ? 'Saving…' : settingsSaved ? 'Saved!' : 'Save Settings'}
             </button>
+
+            {/* Image Migration */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border mt-6" style={{ borderColor: 'rgba(196,120,138,0.15)' }}>
+              <h3 className="font-semibold text-base mb-1 flex items-center gap-2" style={{ color: '#1A1A2E' }}>
+                <Upload size={16} style={{ color: '#C4788A' }} /> Image Migration
+              </h3>
+              <p className="text-xs text-gray-400 mb-4">Migrate all product images from database to Supabase Storage. This improves loading speed significantly. Safe to run — existing images are kept until successfully migrated.</p>
+              {migrationFinished ? (
+                <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: '#3D9B8C' }}>
+                  ✅ Migration complete! All images are now in Storage.
+                </div>
+              ) : migrationRunning ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <span>Migrating images…</span>
+                    <span className="font-semibold" style={{ color: '#C4788A' }}>{migrationDone} / {migrationTotal}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                    <div className="h-3 rounded-full transition-all duration-300" style={{ width: `${migrationTotal > 0 ? (migrationDone / migrationTotal) * 100 : 0}%`, backgroundColor: '#C4788A' }} />
+                  </div>
+                  <p className="text-xs text-gray-400">Please keep this page open until migration completes.</p>
+                </div>
+              ) : (
+                <button onClick={handleMigration}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold text-sm transition-all hover:scale-105 shadow-md"
+                  style={{ backgroundColor: '#3D9B8C' }}>
+                  <Upload size={15} /> Start Image Migration
+                </button>
+              )}
+            </div>
           </div>
         )}
       </main>
@@ -471,7 +546,7 @@ export default function AdminDashboard() {
               <button onClick={() => setShowModal(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors"><X size={18} /></button>
             </div>
             <div className="p-6 flex flex-col gap-4">
-              <ImageUploadZone value={form.image} onChange={(v) => setForm({ ...form, image: v })} />
+              <ImageUploadZone value={form.image} onChange={(v) => setForm({ ...form, image: v })} adminToken={typeof window !== 'undefined' ? sessionStorage.getItem('adminToken') ?? '' : ''} />
               <div><label className="block text-sm font-medium mb-1.5 text-gray-700">Product Name *</label>
                 <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Pink Resin Heart Keychain"
                   className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none" style={{ borderColor: 'rgba(196,120,138,0.3)', color: '#1A1A2E' }} /></div>
