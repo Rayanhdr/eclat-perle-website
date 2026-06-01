@@ -85,12 +85,12 @@ export default function ProductDetailPage() {
             {/* Product Image */}
             <div className="rounded-3xl overflow-hidden shadow-xl">
               {product.image ? (
-                <div className="relative h-96 lg:h-[500px]">
+                <div className="relative h-96 lg:h-[500px] bg-white">
                   <Image
                     src={product.image}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               ) : (

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 
-const CATEGORIES = ['Resin Art', 'Keychains', 'Jewelry', 'Necklace', 'Bracelet', 'Earrings', 'Rings', 'Kids', 'Gifts'];
+const CATEGORIES = ['Resin Art', 'Keychains', 'Jewelry', 'Necklace', 'Bracelet', 'Earrings', 'Rings', 'Anklets', 'Kids', 'Gifts', 'Bookmarks', 'Others'];
 
 const EMPTY_FORM: Omit<Product, 'id'> = { name: '', category: 'Keychains', price: 0, description: '', image: '', max_quantity: undefined };
 

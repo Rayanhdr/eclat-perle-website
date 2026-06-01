@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Suspense, useRef } from 'react';
 
-const CATEGORIES = ['All', 'Resin Art', 'Keychains', 'Jewelry', 'Necklace', 'Bracelet', 'Earrings', 'Rings', 'Kids', 'Gifts'];
+const CATEGORIES = ['All', 'Resin Art', 'Keychains', 'Jewelry', 'Necklace', 'Bracelet', 'Earrings', 'Rings', 'Anklets', 'Kids', 'Gifts', 'Bookmarks', 'Others'];
 const PAGE_SIZE = 12;
 
 function ShopContent() {
@@ -168,52 +168,110 @@ function ShopContent() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 mt-12">
-                  <button
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page === 1}
-                    className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
-                  >
-                    <ChevronLeft size={16} /> Previous
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
-                      .reduce<(number | string)[]>((acc, p, idx, arr) => {
-                        if (idx > 0 && (p as number) - (arr[idx - 1] as number) > 1) acc.push('...');
-                        acc.push(p);
-                        return acc;
-                      }, [])
-                      .map((p, idx) =>
-                        p === '...' ? (
-                          <span key={`dots-${idx}`} className="px-2 text-gray-400">...</span>
-                        ) : (
-                          <button
-                            key={p}
-                            onClick={() => handlePageChange(p as number)}
-                            className="w-9 h-9 rounded-full text-sm font-semibold transition-all duration-200"
-                            style={
-                              page === p
-                                ? { backgroundColor: '#C4788A', color: '#fff' }
-                                : { backgroundColor: '#F9EEF3', color: '#8B4E6B' }
-                            }
-                          >
-                            {p}
-                          </button>
-                        )
-                      )}
+                <div className="mt-12">
+                  {/* Mobile pagination */}
+                  <div className="flex sm:hidden items-center justify-between gap-2">
+                    <button
+                      onClick={() => handlePageChange(1)}
+                      disabled={page === 1}
+                      className="px-3 py-2 rounded-full text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      className="flex items-center gap-1 px-3 py-2 rounded-full text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      <ChevronLeft size={14} /> Prev
+                    </button>
+                    <span className="text-sm font-semibold px-3 py-2 rounded-full text-white" style={{ backgroundColor: '#C4788A' }}>
+                      {page} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page === totalPages}
+                      className="flex items-center gap-1 px-3 py-2 rounded-full text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      Next <ChevronRight size={14} />
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={page === totalPages}
+                      className="px-3 py-2 rounded-full text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      Last
+                    </button>
                   </div>
 
-                  <button
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page === totalPages}
-                    className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
-                  >
-                    Next <ChevronRight size={16} />
-                  </button>
+                  {/* Desktop pagination */}
+                  <div className="hidden sm:flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(1)}
+                      disabled={page === 1}
+                      className="px-3 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      <ChevronLeft size={16} /> Previous
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+                        .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                          if (idx > 0 && (p as number) - (arr[idx - 1] as number) > 1) acc.push('...');
+                          acc.push(p);
+                          return acc;
+                        }, [])
+                        .map((p, idx) =>
+                          p === '...' ? (
+                            <span key={`dots-${idx}`} className="px-2 text-gray-400">...</span>
+                          ) : (
+                            <button
+                              key={p}
+                              onClick={() => handlePageChange(p as number)}
+                              className="w-9 h-9 rounded-full text-sm font-semibold transition-all duration-200"
+                              style={
+                                page === p
+                                  ? { backgroundColor: '#C4788A', color: '#fff' }
+                                  : { backgroundColor: '#F9EEF3', color: '#8B4E6B' }
+                              }
+                            >
+                              {p}
+                            </button>
+                          )
+                        )}
+                    </div>
+
+                    <button
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page === totalPages}
+                      className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      Next <ChevronRight size={16} />
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={page === totalPages}
+                      className="px-3 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ backgroundColor: '#F9EEF3', color: '#8B4E6B' }}
+                    >
+                      Last
+                    </button>
+                  </div>
                 </div>
               )}
             </>
