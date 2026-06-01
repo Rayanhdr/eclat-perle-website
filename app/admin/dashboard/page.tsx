@@ -615,35 +615,6 @@ export default function AdminDashboard() {
               {savingSettings ? 'Saving…' : settingsSaved ? 'Saved!' : 'Save Settings'}
             </button>
 
-            {/* Image Migration */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border mt-6" style={{ borderColor: 'rgba(196,120,138,0.15)' }}>
-              <h3 className="font-semibold text-base mb-1 flex items-center gap-2" style={{ color: '#1A1A2E' }}>
-                <Upload size={16} style={{ color: '#C4788A' }} /> Image Migration
-              </h3>
-              <p className="text-xs text-gray-400 mb-4">Migrate all product images from database to Supabase Storage. This improves loading speed significantly. Safe to run — existing images are kept until successfully migrated.</p>
-              {migrationFinished ? (
-                <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: '#3D9B8C' }}>
-                  ✅ Migration complete! All images are now in Storage.
-                </div>
-              ) : migrationRunning ? (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span>Migrating images…</span>
-                    <span className="font-semibold" style={{ color: '#C4788A' }}>{migrationDone} / {migrationTotal}</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-                    <div className="h-3 rounded-full transition-all duration-300" style={{ width: `${migrationTotal > 0 ? (migrationDone / migrationTotal) * 100 : 0}%`, backgroundColor: '#C4788A' }} />
-                  </div>
-                  <p className="text-xs text-gray-400">Please keep this page open until migration completes.</p>
-                </div>
-              ) : (
-                <button onClick={handleMigration}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold text-sm transition-all hover:scale-105 shadow-md"
-                  style={{ backgroundColor: '#3D9B8C' }}>
-                  <Upload size={15} /> Start Image Migration
-                </button>
-              )}
-            </div>
           </div>
         )}
       </main>
