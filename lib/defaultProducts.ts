@@ -28,9 +28,10 @@ export async function getProducts(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  // Phase 1: fetch without images for instant display
   let query = getSupabase()
     .from('products')
-    .select('*', { count: 'exact' })
+    .select('id, name, category, price, description, max_quantity, created_at', { count: 'exact' })
     .order('created_at', { ascending: true });
 
   if (category && category !== 'All') {
@@ -45,7 +46,20 @@ export async function getProducts(
 
   if (error) { console.error('getProducts:', error.message); return { products: DEFAULT_PRODUCTS, total: DEFAULT_PRODUCTS.length }; }
   if (!data || data.length === 0) return { products: [], total: count ?? 0 };
-  return { products: data as Product[], total: count ?? 0 };
+  return { products: data.map(p => ({ ...p, image: '' })) as Product[], total: count ?? 0 };
+}
+
+// Phase 2: fetch only images for a list of product IDs
+export async function getProductImages(ids: string[]): Promise<Record<string, string>> {
+  if (!ids.length) return {};
+  const { data, error } = await getSupabase()
+    .from('products')
+    .select('id, image')
+    .in('id', ids);
+  if (error || !data) return {};
+  const map: Record<string, string> = {};
+  data.forEach((p) => { map[p.id] = p.image ?? ''; });
+  return map;
 }
 
 export async function getProductById(id: string): Promise<Product | null> {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Product } from '@/lib/types';
-import { getProducts } from '@/lib/defaultProducts';
+import { getProducts, getProductImages } from '@/lib/defaultProducts';
 import ProductCard from '@/components/ProductCard';
 import Footer from '@/components/Footer';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -26,11 +26,21 @@ function ShopContent() {
 
   const fetchProducts = useCallback(async (currentPage: number, cat: string, q: string) => {
     setLoading(true);
+
+    // Phase 1: load metadata without images — instant
     const { products, total } = await getProducts(currentPage, PAGE_SIZE, cat, q);
     setProducts(products);
     setTotal(total);
     setLoading(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Phase 2: load images in background — progressive
+    if (products.length > 0) {
+      const ids = products.map((p) => p.id);
+      getProductImages(ids).then((imageMap) => {
+        setProducts((prev) => prev.map((p) => ({ ...p, image: imageMap[p.id] ?? '' })));
+      });
+    }
   }, []);
 
   useEffect(() => {
