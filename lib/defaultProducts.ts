@@ -21,8 +21,9 @@ export function formatPrice(price: number): string {
 
 export async function getProducts(): Promise<Product[]> {
   const { data, error } = await getSupabase()
-    .from('products').select('*').order('created_at', { ascending: true });
-  if (error || !data) return DEFAULT_PRODUCTS;
+    .from('products').select('*').order('created_at', { ascending: true }).limit(1000);
+  if (error) { console.error('getProducts:', error.message); return DEFAULT_PRODUCTS; }
+  if (!data || data.length === 0) return DEFAULT_PRODUCTS;
   return data as Product[];
 }
 
