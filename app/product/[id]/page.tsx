@@ -37,7 +37,7 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
-    getProducts().then((products) => {
+    getProducts(1, 1000).then(({ products }) => {
       const found = products.find((p) => p.id === params.id);
       if (!found) { router.push('/shop'); return; }
       setProduct(found);

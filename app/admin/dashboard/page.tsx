@@ -123,7 +123,7 @@ export default function AdminDashboard() {
     if (typeof window === 'undefined') return;
     if (sessionStorage.getItem('isAdmin') !== 'true') { router.push('/admin/login'); return; }
     setLoadingProducts(true);
-    getProducts().then((d) => { setProducts(d); setLoadingProducts(false); });
+    getProducts(1, 1000).then(({ products }) => { setProducts(products); setLoadingProducts(false); });
     // Load all settings via secure API route
     adminFetch('/api/admin/settings')
       .then((r) => r.json())

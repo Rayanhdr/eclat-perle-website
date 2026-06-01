@@ -19,12 +19,19 @@ export function formatPrice(price: number): string {
 
 // ── Products ──────────────────────────────────────────────────────────────────
 
-export async function getProducts(): Promise<Product[]> {
-  const { data, error } = await getSupabase()
-    .from('products').select('*').order('created_at', { ascending: true }).limit(1000);
-  if (error) { console.error('getProducts:', error.message); return DEFAULT_PRODUCTS; }
-  if (!data || data.length === 0) return DEFAULT_PRODUCTS;
-  return data as Product[];
+export async function getProducts(page: number = 1, pageSize: number = 12): Promise<{ products: Product[]; total: number }> {
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await getSupabase()
+    .from('products')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: true })
+    .range(from, to);
+
+  if (error) { console.error('getProducts:', error.message); return { products: DEFAULT_PRODUCTS, total: DEFAULT_PRODUCTS.length }; }
+  if (!data || data.length === 0) return { products: [], total: count ?? 0 };
+  return { products: data as Product[], total: count ?? 0 };
 }
 
 export async function addProduct(product: Omit<Product, 'id'>): Promise<Product | null> {
